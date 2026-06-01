@@ -3,22 +3,21 @@ package main
 import (
 	"image/color"
 
+	"github.com/ArteShow/ASPE/internal/math"
+	"github.com/ArteShow/ASPE/internal/physics"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const (
-	gravity      = 0.2
-	acceleration = 0.1
-	velocity     = 0.5
+var (
+	World = physics.NewWorld(math.Vector2{
+		Y: 0.1,
+	})
 )
 
 type Game struct {
 	Object *ebiten.Image
-
-	x  float64
-	y  float64
-	vx float64
-	vy float64
+	x      float64
+	y      float64
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
@@ -30,37 +29,28 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) Update() error {
+	input := math.Vector2{}
 	if ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
-		g.vx = g.vx + velocity
+		input.X += 1
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
-		g.vx = g.vx - velocity
+		input.X -= 1
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyArrowDown) {
-		g.vy = g.vy + velocity
+		input.Y += 1
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyArrowUp) {
-		g.vy = g.vy - velocity
+		input.Y -= 1
 	}
 
-	g.vy = g.vy + gravity
+	World.Input = input
+	World.Update()
 
-	g.y = g.y + g.vy
-	g.x = g.x + g.vx
-
-	if g.vx < 0 {
-		g.vx = g.vx + acceleration
-	}
-	if g.vx > 0 {
-		g.vx = g.vx - acceleration
-	}
-
-	if g.vy != 0 {
-		g.vy = g.vy - acceleration
-	}
+	g.x = World.Bodies[0].Position.X
+	g.y = World.Bodies[0].Position.Y
 
 	return nil
 }
@@ -77,8 +67,13 @@ func main() {
 	game.Object = ebiten.NewImage(10, 10)
 	game.Object.Fill(color.RGBA{255, 0, 0, 255})
 
-	game.vx = 0
-	game.vx = 0
+	World.Bodies = append(World.Bodies, physics.NewBody(
+		50,
+		50,
+		1,
+		3,
+	))
+
 	if err := ebiten.RunGame(game); err != nil {
 		panic(err)
 	}
