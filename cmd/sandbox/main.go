@@ -9,15 +9,16 @@ import (
 )
 
 var (
-	World = physics.NewWorld(math.Vector2{
+	World = physics.NewWorld(800, 600, math.Vector2{
 		Y: 0.1,
 	})
 )
 
 type Game struct {
-	Object *ebiten.Image
-	x      float64
-	y      float64
+	Object    *ebiten.Image
+	NewObject *ebiten.Image
+	x         float64
+	y         float64
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
@@ -64,12 +65,22 @@ func main() {
 	ebiten.SetWindowSize(800, 600)
 
 	game := &Game{}
+
 	game.Object = ebiten.NewImage(10, 10)
 	game.Object.Fill(color.RGBA{255, 0, 0, 255})
+
+	game.NewObject = ebiten.NewImage(100, 100)
+	game.NewObject.Fill(color.White)
 
 	World.Bodies = append(World.Bodies, physics.NewBody(
 		50,
 		50,
+		1,
+		3,
+	))
+	World.Bodies = append(World.Bodies, physics.NewBody(
+		100,
+		100,
 		1,
 		3,
 	))
